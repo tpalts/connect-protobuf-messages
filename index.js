@@ -37,35 +37,46 @@ ConnectProtobufMessages.prototype.decode = function (buffer) {
     };
 };
 
-ConnectProtobufMessages.prototype.load = function (config) {
-    this.builders = this.params.map(function (param) {
-        return protobuf.loadProtoFile(param.file);
-    });
+ConnectProtobufMessages.prototype.load = function () {
+    this.params.map(function (param) {
+        this.builder = protobuf.loadProtoFile(param.file, this.builder);
+    }, this);
+};
+
+
+ConnectProtobufMessages.prototype.markFileAsLoadedForImport = function (protoFile) {
+    this.rootUrl = this.rootUrl || (protoFile.url.replace(/\/[^\/]*$/, '') + '/');
+    this.builder.files[this.rootUrl + protoFile.name] = true;
+};
+
+ConnectProtobufMessages.prototype.loadFile = function (protoFile) {
+    this.builder = protobuf.loadProtoFile(protoFile.url, this.builder);
+    this.markFileAsLoadedForImport(protoFile);
 };
 
 ConnectProtobufMessages.prototype.build = function () {
-    this.builders.forEach(function (builder) {
-        builder.build(this.protoPayloadType);
+    var builder = this.builder;
 
-        var messages = builder.ns.children.filter(function (reflect) {
-            return (reflect.className === 'Message') && (typeof this.findPayloadType(reflect) === 'number');
-        }, this);
+    builder.build();
 
-        messages.forEach(function (message) {
-            var payloadType = this.findPayloadType(message);
-            var name = message.name;
+    var messages = builder.ns.children.filter(function (reflect) {
+        return (reflect.className === 'Message') && (typeof this.findPayloadType(reflect) === 'number');
+    }, this);
 
-            var messageBuilded = builder.build(name);
+    messages.forEach(function (message) {
+        var payloadType = this.findPayloadType(message);
+        var name = message.name;
 
-            this.names[name] = {
-                messageBuilded: messageBuilded,
-                payloadType: payloadType
-            };
-            this.payloadTypes[payloadType] = {
-                messageBuilded: messageBuilded,
-                name: name
-            };
-        }, this);
+        var messageBuilded = builder.build(name);
+
+        this.names[name] = {
+            messageBuilded: messageBuilded,
+            payloadType: payloadType
+        };
+        this.payloadTypes[payloadType] = {
+            messageBuilded: messageBuilded,
+            name: name
+        };
     }, this);
 
     this.buildWrapper();
@@ -73,7 +84,7 @@ ConnectProtobufMessages.prototype.build = function () {
 
 ConnectProtobufMessages.prototype.buildWrapper = function () {
     var name = 'ProtoMessage';
-    var messageBuilded = this.builders[0].build(name);
+    var messageBuilded = this.builder.build(name);
     this.names[name] = {
         messageBuilded: messageBuilded,
         payloadType: undefined
