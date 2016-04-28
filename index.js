@@ -79,6 +79,17 @@ ConnectProtobufMessages.prototype.build = function () {
         };
     }, this);
 
+    var enums = builder.ns.children.filter(function (reflect) {
+        return (reflect.className === 'Enum');
+    }, this);
+
+    enums.forEach(function (enumClass) {
+        var protoEnum = builder.build(enumClass.name);
+        this.__defineGetter__(enumClass.name, function() {
+           return protoEnum;
+        });
+    }, this);
+
     this.buildWrapper();
 };
 
