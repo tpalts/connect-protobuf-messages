@@ -8,6 +8,8 @@ var ConnectProtobufMessages = function (params) {
     this.builder = undefined;
     this.payloadTypes = {};
     this.names = {};
+    this.messages = {};
+    this.enums = {};
 };
 
 ConnectProtobufMessages.prototype.encode = function (payloadType, params) {
@@ -59,36 +61,47 @@ ConnectProtobufMessages.prototype.build = function () {
 
     builder.build();
 
-    var messages = builder.ns.children.filter(function (reflect) {
-        return (reflect.className === 'Message') && (typeof this.findPayloadType(reflect) === 'number');
+    var messages = [];
+    var enums = [];
+
+    builder.ns.children.forEach(function (reflect) {
+        var className = reflect.className;
+
+        if (className === 'Message') {
+            messages.push(reflect);
+        } else if (className === 'Enum') {
+            enums.push(reflect);
+        }
     }, this);
 
-    messages.forEach(function (message) {
-        var payloadType = this.findPayloadType(message);
-        var name = message.name;
+    messages
+        .filter(function (message) {
+            return typeof this.findPayloadType(message) === 'number';
+        }, this)
+        .forEach(function (message) {
+            var name = message.name;
 
-        var messageBuilded = builder.build(name);
+            var messageBuilded = builder.build(name);
 
-        this.names[name] = {
-            messageBuilded: messageBuilded,
-            payloadType: payloadType
-        };
-        this.payloadTypes[payloadType] = {
-            messageBuilded: messageBuilded,
-            name: name
-        };
-    }, this);
+            this.messages[name] = messageBuilded;
 
-    var enums = builder.ns.children.filter(function (reflect) {
-        return (reflect.className === 'Enum');
-    }, this);
+            var payloadType = this.findPayloadType(message);
 
-    enums.forEach(function (enumClass) {
-        var protoEnum = builder.build(enumClass.name);
-        this.__defineGetter__(enumClass.name, function() {
-           return protoEnum;
-        });
-    }, this);
+            this.names[name] = {
+                messageBuilded: messageBuilded,
+                payloadType: payloadType
+            };
+            this.payloadTypes[payloadType] = {
+                messageBuilded: messageBuilded,
+                name: name
+            };
+        }, this);
+
+    enums
+        .forEach(function (enume) {
+            var name = enume.name;
+            this.enums[name] = builder.build(name);
+        }, this);
 
     this.buildWrapper();
 };
@@ -96,6 +109,7 @@ ConnectProtobufMessages.prototype.build = function () {
 ConnectProtobufMessages.prototype.buildWrapper = function () {
     var name = 'ProtoMessage';
     var messageBuilded = this.builder.build(name);
+    this.messages[name] = messageBuilded;
     this.names[name] = {
         messageBuilded: messageBuilded,
         payloadType: undefined
