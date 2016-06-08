@@ -1,7 +1,6 @@
 'use strict';
 
 var protobuf = require('protobufjs');
-var hat = require('hat');
 
 var ConnectProtobufMessages = function (params) {
     this.params = params;
@@ -12,18 +11,20 @@ var ConnectProtobufMessages = function (params) {
     this.enums = {};
 };
 
-ConnectProtobufMessages.prototype.encode = function (payloadType, params) {
+ConnectProtobufMessages.prototype.encode = function (payloadType, params, clientMsgId) {
     var Message = this.getMessageByPayloadType(payloadType);
     var message = new Message(params);
-    return this.wrap(payloadType, message);
+
+    return this.wrap(payloadType, message, clientMsgId).encode();
 };
 
-ConnectProtobufMessages.prototype.wrap = function (payloadType, message) {
+ConnectProtobufMessages.prototype.wrap = function (payloadType, message, clientMsgId) {
     var ProtoMessage = this.getMessageByName('ProtoMessage');
+
     return new ProtoMessage({
         payloadType: payloadType,
         payload: message.toBuffer(),
-        clientMsgId: hat()
+        clientMsgId: clientMsgId
     });
 };
 
