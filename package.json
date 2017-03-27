@@ -19,5 +19,8 @@
   "homepage": "https://github.com/spotware/connect-protobuf-messages#readme",
   "dependencies": {
     "protobufjs": "5.0.1"
+  },
+  "devDependencies": {
+    "ava": "0.18.2"
   }
 }
