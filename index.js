@@ -34,7 +34,7 @@ ConnectProtobufMessages.prototype.decode = function (buffer) {
     var payloadType = protoMessage.payloadType;
 
     return {
-        msg: this.getMessageByPayloadType(payloadType).decode(protoMessage.payload),
+        payload: this.getMessageByPayloadType(payloadType).decode(protoMessage.payload),
         payloadType: payloadType,
         clientMsgId: protoMessage.clientMsgId
     };
