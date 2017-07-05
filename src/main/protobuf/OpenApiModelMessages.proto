@@ -1,9 +1,10 @@
 option java_multiple_files = true;
-option java_generate_equals_and_hash = true;
-option java_package = "com.xtrader.protocol.proto.openapi.model";
-option java_outer_classname = "ContainerOpenApiModelMessages";
 
-import "CommonModelMessages.proto";
+option java_generate_equals_and_hash = true;
+
+option java_package = "com.xtrader.protocol.proto.openapi.model";
+
+option java_outer_classname = "ContainerOpenApiModelMessages";
 
 //+------------------------------------------------------------------+
 //|               Open Trading API Enumerates                        |
@@ -34,6 +35,9 @@ enum ProtoOAPayloadType {
     OA_GET_ALL_SPOT_SUBSCRIPTIONS_REQ = 2027;
     OA_GET_ALL_SPOT_SUBSCRIPTIONS_RES = 2028;
     OA_SPOT_EVENT = 2029;
+
+    OA_PING_REQ = 2030;
+    OA_PING_RES = 2031;
 }
 
 /** Supported order types*/
@@ -43,6 +47,7 @@ enum ProtoOAOrderType {
     OA_STOP = 3;
     OA_PROTECTION = 4;
     OA_MARKET_RANGE = 5;
+    OA_STOP_LIMIT = 6;
 }
 
 /** Open Api Execution Type*/
@@ -99,6 +104,7 @@ message ProtoOAOrder {
     optional ProtoOAClosePositionDetails closePositionDetails = 24;
     optional string clientOrderId = 25;
     optional bool stopOut = 26;
+    optional int32 slippageInPoints = 31;
 }
 
 /** Represents an information about a position from execution event received from server */
@@ -172,4 +178,22 @@ enum ProtoOATrendbarPeriod {
     D1 = 12;
     W1 = 13;
     MN1 = 14;
+}
+
+enum ProtoTradeSide {
+    BUY = 1;
+    SELL = 2;
+}
+
+enum ProtoQuoteType {
+    BID = 1;
+    ASK = 2;
+}
+
+enum ProtoTimeInForce {
+    GOOD_TILL_DATE = 1;
+    GOOD_TILL_CANCEL = 2;
+    IMMEDIATE_OR_CANCEL = 3;
+    FILL_OR_KILL = 4;
+    MARKET_ON_OPEN = 5;
 }

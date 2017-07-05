@@ -1,10 +1,12 @@
 option java_multiple_files = true;
+
 option java_generate_equals_and_hash = true;
+
 option java_package = "com.xtrader.protocol.proto.openapi";
+
 option java_outer_classname = "ContainerOpenApiMessages";
 
 import "OpenApiModelMessages.proto";
-import "CommonModelMessages.proto";
 
 //+------------------------------------------------------------------+
 //|                  Open Trading API Messages                       |
@@ -93,6 +95,7 @@ message ProtoOACreateOrderReq {
     optional int64 positionId = 18;
     optional ProtoTimeInForce timeInForce = 19;
     optional string clientOrderId = 20;
+    optional int32 slippageInPoints = 21;
 }
 
 /** Cancel pending order request*/
@@ -134,8 +137,8 @@ message ProtoOAAmendOrderReq {
     optional double stopPrice = 7;
     optional int64 expirationTimestamp = 8; // should be set in case GTD.
     optional int64 minVolume = 9; // min volume to fill. If minVolume equals to volume this means partial fills is disabled not supported yet
-    optional double stopLossPrice = 10; // absolute stop loss price (1.23456 for example). Excludes takeProfitInPips field. Unsupported for MARKER orders.
-    optional double takeProfitPrice = 11; // absolute take profit price (1.23456 for example). Excludes takeProfitInPips field. Unsupported for MARKER orders.
+    optional double stopLossPrice = 10; // absolute stop loss price (1.23456 for example). Excludes relativeTakeProfit field. Unsupported for MARKER orders.
+    optional double takeProfitPrice = 11; // absolute take profit price (1.23456 for example). Excludes relativeTakeProfit field. Unsupported for MARKER orders.
     optional int32 relativeStopLossInPips = 12; // relative stop loss price for Market order with relative SL/TP set in pips
     optional int32 relativeTakeProfitInPips = 14; // relative take profit price for Market order with relative SL/TP set in pips
     optional string comment = 15; // not supported yet
@@ -200,4 +203,16 @@ message ProtoOASpotEvent {
     optional double askPrice = 5;
     repeated ProtoOATrendbar trendbar = 6;
     required int64 timestamp = 7;
+}
+
+/** Open API Ping request */
+message ProtoOAPingReq {
+    optional ProtoOAPayloadType payloadType = 1 [default = OA_PING_REQ];
+    required int64 timestamp = 2;
+}
+
+/** Open API Ping response */
+message ProtoOAPingRes {
+    optional ProtoOAPayloadType payloadType = 1 [default = OA_PING_RES];
+    required int64 timestamp = 2;
 }
